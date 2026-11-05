@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clearline — Bulk clean your X account</title>
+<meta name="description" content="One-click bulk delete for X: posts, replies, reposts and likes. Runs in your own browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d; --panel:#121418; --panel2:#181b21; --line:#262a33;
+    --text:#eceef2; --muted:#8b92a1; --accent:#ff5a36; --accent2:#ffb199;
+    --ok:#3ddc97; --warn:#ffcc4d; --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.5}
+  a{color:var(--accent2)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,11,13,.85);backdrop-filter:blur(10px);z-index:5}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .logo{font-family:"Space Grotesk";font-weight:700;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+  .logo i{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--accent),#ff2d6f);display:inline-block;position:relative}
+  .logo i:after{content:"";position:absolute;left:5px;right:5px;top:10px;height:2px;background:#fff;border-radius:2px}
+  nav a{color:var(--muted);text-decoration:none;font-size:14px;margin-left:20px}
+  nav a:hover{color:var(--text)}
+  .hero{padding:64px 0 40px}
+  .tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);border:1px solid #3a2620;background:#1c120f;padding:5px 10px;border-radius:99px}
+  h1{font-family:"Space Grotesk";font-size:clamp(36px,6vw,64px);line-height:1.02;letter-spacing:-.035em;margin:18px 0 16px;max-width:820px}
+  h1 span{color:var(--accent)}
+  .lead{color:var(--muted);font-size:18px;max-width:640px;margin:0}
+  h2{font-family:"Space Grotesk";font-size:28px;letter-spacing:-.02em;margin:0 0 6px}
+  .sub{color:var(--muted);margin:0 0 24px}
+  section{padding:48px 0;border-top:1px solid var(--line)}
+
+  /* quick start */
+  .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+  @media(max-width:860px){.quick{grid-template-columns:1fr}}
+  .qs{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px;position:relative}
+  .qs .n{font-family:"Space Grotesk";font-size:13px;color:var(--accent2);font-weight:700;letter-spacing:.06em}
+  .qs b{display:block;font-family:"Space Grotesk";font-size:19px;margin:6px 0 6px}
+  .qs p{color:var(--muted);font-size:14px;margin:0}
+  .qs.main{border-color:#5a2c20;background:linear-gradient(180deg,#1d1210,#121418)}
+  .bm{display:inline-flex;align-items:center;gap:10px;margin-top:16px;background:var(--accent);color:#fff;text-decoration:none;font:700 16px "Space Grotesk";padding:12px 18px;border-radius:12px;cursor:grab;box-shadow:0 8px 30px rgba(255,90,54,.35);border:2px dashed rgba(255,255,255,.55);animation:pulse 2.4s infinite}
+  .bm:active{cursor:grabbing}
+  @keyframes pulse{0%,100%{box-shadow:0 8px 30px rgba(255,90,54,.25)}50%{box-shadow:0 8px 40px rgba(255,90,54,.6)}}
+  .kbd{font-family:"JetBrains Mono";font-size:12px;background:var(--panel2);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--text)}
+  .nudge{display:none;margin-top:10px;font-size:13px;color:var(--warn)}
+
+  .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}nav{display:none}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+  .card h3{margin:0 0 14px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .field{margin-bottom:16px}
+  label.l{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  input[type=text],input[type=number],input[type=date],textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;outline:none}
+  input:focus,textarea:focus{border-color:var(--accent)}
+  input[type=date]{color-scheme:dark}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .toggles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+  .tg{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;user-select:none;transition:.15s}
+  .tg input{display:none}
+  .tg .box{width:20px;height:20px;border-radius:6px;border:2px solid #3a3f4a;flex:none;display:grid;place-items:center;transition:.15s}
+  .tg input:checked + .box{background:var(--accent);border-color:var(--accent)}
+  .tg input:checked + .box:after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .tg:has(input:checked){border-color:#4a2a22;background:#1a1210}
+  .tg b{display:block;font-size:14px}
+  .tg small{color:var(--muted);font-size:12px}
+  .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+  .switch:first-of-type{border-top:0}
+  .switch small{display:block;color:var(--muted);font-size:12px}
+  .sw{position:relative;width:40px;height:22px;flex:none}
+  .sw input{opacity:0;width:0;height:0}
+  .sw span{position:absolute;inset:0;background:#2b2f38;border-radius:99px;cursor:pointer;transition:.2s}
+  .sw span:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .sw input:checked + span{background:var(--accent)}
+  .sw input:checked + span:before{transform:translateX(18px)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .rangeval{float:right;color:var(--accent2);font-family:"JetBrains Mono";font-size:12px}
+  .summary{font-size:14px;color:var(--muted);background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+  .summary b{color:var(--text)}
+  textarea.code{font-family:"JetBrains Mono",monospace;font-size:11.5px;height:120px;resize:vertical;color:#c7cbd4;white-space:pre}
+  .btn{appearance:none;border:1px solid var(--line);background:transparent;color:var(--text);font:600 14px Inter;padding:11px 16px;border-radius:12px;cursor:pointer;width:100%;margin-top:10px}
+  .btn:hover{border-color:var(--accent)}
+  .warnbox{border:1px solid #4a3b16;background:#17130a;border-radius:var(--r);padding:16px 18px;font-size:14px;color:#e9dcb8;margin-top:20px}
+  .warnbox b{color:var(--warn)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px}
+  summary{cursor:pointer;font-weight:600;font-size:15px}
+  details p{color:var(--muted);font-size:14px;margin:10px 0 0}
+  footer{border-top:1px solid var(--line);padding:28px 0 48px;color:var(--muted);font-size:13px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#06150e;font-weight:600;padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;font-size:14px;z-index:20}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="logo"><i></i>Clearline</div>
+    <nav><a href="#start">Start</a><a href="#settings">Settings</a><a href="#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<div class="wrap hero" id="start">
+  <span class="tag">For X / Twitter · one click · runs in your browser</span>
+  <h1>Wipe your X history in <span>one click.</span></h1>
+  <p class="lead">Deletes your posts and replies, undoes reposts and removes likes, all automatically. No login, no API keys, no typing code.</p>
+
+  <div class="quick">
+    <div class="qs main">
+      <div class="n">STEP 1 · ONCE</div>
+      <b>Drag this button to your bookmarks bar</b>
+      <p>Can't see the bar? Press <span class="kbd">Ctrl+Shift+B</span> (Mac <span class="kbd">⌘+Shift+B</span>).</p>
+      <a class="bm" id="bm" href="#">🧹 Clearline</a>
+      <div class="nudge" id="nudge">Don't click it here. <b>Drag</b> it up to your bookmarks bar.</div>
+    </div>
+    <div class="qs">
+      <div class="n">STEP 2</div>
+      <b>Open x.com</b>
+      <p>Any page works, as long as you're logged in to the account you want to clean. Use a computer (Chrome, Edge, Brave or Firefox).</p>
+    </div>
+    <div class="qs">
+      <div class="n">STEP 3</div>
+      <b>Click the bookmark</b>
+      <p>A Clearline panel appears. Press <b>Start</b> and it works through your posts, reposts, replies and then your likes. Press <b>Stop</b> any time.</p>
+    </div>
+  </div>
+
+  <div class="warnbox">
+    <b>Read first:</b> deletions are permanent. Download your X archive first (Settings → Your account → Download an archive of your data). Clearline is unofficial: automating actions may go against X's rules, and X can rate-limit or briefly lock accounts that act too fast. The default speed is set to be careful.
+  </div>
+</div>
+
+<section id="settings">
+  <div class="wrap">
+    <h2>Settings <span style="font-size:15px;color:var(--muted);font-weight:500">(optional)</span></h2>
+    <p class="sub">The defaults remove everything. Change anything here and the bookmark updates; drag it to the bar again to replace the old one.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>What to remove</h3>
+        <div class="toggles">
+          <label class="tg"><input type="checkbox" id="posts" checked><span class="box"></span><span><b>Posts</b><small>Your original posts</small></span></label>
+          <label class="tg"><input type="checkbox" id="replies" checked><span class="box"></span><span><b>Replies</b><small>Comments you left</small></span></label>
+          <label class="tg"><input type="checkbox" id="reposts" checked><span class="box"></span><span><b>Reposts</b><small>Undo retweets</small></span></label>
+          <label class="tg"><input type="checkbox" id="likes" checked><span class="box"></span><span><b>Likes</b><small>Unlike posts</small></span></label>
+        </div>
+        <h3>Filters</h3>
+        <div class="row field">
+          <div><label class="l" for="from">Only after</label><input id="from" type="date"></div>
+          <div><label class="l" for="to">Only before</label><input id="to" type="date"></div>
+        </div>
+        <div class="field">
+          <label class="l" for="keep">Keep anything containing</label>
+          <input id="keep" type="text" placeholder="e.g. #launch, giveaway">
+          <div class="hint">Comma-separated. Posts containing these words are skipped.</div>
+        </div>
+        <div class="switch"><div>Keep pinned post<small>Never touch the post pinned to your profile</small></div><label class="sw"><input type="checkbox" id="keepPinned" checked><span></span></label></div>
+        <div class="switch"><div>Dry run<small>Only count what would be removed, without removing it</small></div><label class="sw"><input type="checkbox" id="dry"><span></span></label></div>
+      </div>
+
+      <div class="card">
+        <h3>Speed & safety</h3>
+        <div class="field">
+          <label class="l">Delay between actions <span class="rangeval" id="delayV">1.5s</span></label>
+          <input id="delay" type="range" min="600" max="5000" step="100" value="1500">
+          <div class="hint">Slower is safer. Very fast runs can trigger X limits.</div>
+        </div>
+        <div class="row field">
+          <div><label class="l" for="pauseEvery">Rest every</label><input id="pauseEvery" type="number" min="0" value="100"><div class="hint">actions (0 = never)</div></div>
+          <div><label class="l" for="pauseSec">Rest for</label><input id="pauseSec" type="number" min="5" value="60"><div class="hint">seconds</div></div>
+        </div>
+        <div class="row field">
+          <div><label class="l" for="limit">Stop after</label><input id="limit" type="number" min="1" value="5000"><div class="hint">actions per run</div></div>
+          <div><label class="l" for="delWord">Delete button text</label><input id="delWord" type="text" value="Delete"><div class="hint">Change if X isn't in English</div></div>
+        </div>
+        <div class="summary" id="summary"></div>
+        <details style="background:var(--panel2);margin:0">
+          <summary style="font-size:14px">Bookmark won't work? Use the console instead</summary>
+          <p>On x.com press <span class="kbd">F12</span> → Console, paste this, press Enter. (Chrome may ask you to type <span class="kbd">allow pasting</span> first.)</p>
+          <textarea class="code" id="code" readonly spellcheck="false"></textarea>
+          <button class="btn" id="copy">Copy script</button>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <h2>FAQ</h2>
+    <p class="sub">&nbsp;</p>
+    <details><summary>Do I need to type my username?</summary><p>No. Clearline reads it from the X page you're logged in to.</p></details>
+    <details><summary>I clicked the bookmark and nothing happened.</summary><p>Make sure you're on x.com and logged in, then refresh and click it again. If your browser blocks it, use the console option under Settings.</p></details>
+    <details><summary>Will it get all my old likes?</summary><p>X's Likes tab only loads a limited history (often a few thousand). Very old likes that don't appear there can't be reached. Running it again a day later often reaches more.</p></details>
+    <details><summary>It stopped before finishing.</summary><p>Usually a rate limit or the timeline ran out of loaded items. Clearline rests 5 minutes if X shows an error. Otherwise refresh x.com and click the bookmark again; it picks up from where your timeline starts.</p></details>
+    <details><summary>How does it tell replies from posts?</summary><p>From X's "Replying to" label or from sitting under someone else's post in a thread. It's best-effort. Use Dry run to check the counts first if that matters to you.</p></details>
+    <details><summary>Can I use it on my phone?</summary><p>It's built for desktop browsers. Phones make bookmarklets awkward and X's mobile site behaves differently.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Clearline is an independent tool and isn't affiliated with or endorsed by X Corp. Use at your own risk.</div>
+</footer>
+
+<div class="toast" id="toast">Copied</div>
+
+<script>
+/* ===== Cleaner that runs on x.com (serialised into the bookmark) ===== */
+async function clearlineSweep(cfg){
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  if(!/(^|\.)(x|twitter)\.com$/.test(location.hostname)){
+    if(confirm('Clearline works on x.com. Open x.com now?')) location.href='https://x.com/home';
+    return;
+  }
+  const old=document.getElementById('clearline-panel'); if(old) old.remove();
+  const panel=document.createElement('div'); panel.id='clearline-panel';
+  panel.style.cssText='position:fixed;right:16px;bottom:16px;z-index:2147483647;background:#121418;color:#eceef2;font:13px/1.5 system-ui,sans-serif;border:1px solid #ff5a36;border-radius:14px;padding:16px;width:270px;box-shadow:0 12px 40px rgba(0,0,0,.55)';
+  const title=document.createElement('div'); title.style.cssText='font-weight:700;font-size:15px;margin-bottom:8px;color:#ff5a36';
+  const body=document.createElement('div'); body.style.cssText='white-space:pre-line';
+  const btn=document.createElement('button');
+  btn.style.cssText='margin-top:12px;width:100%;padding:10px;border:0;border-radius:10px;background:#ff5a36;color:#fff;font-weight:700;font-size:14px;cursor:pointer';
+  const close=document.createElement('div'); close.textContent='×';
+  close.style.cssText='position:absolute;top:8px;right:12px;cursor:pointer;font-size:18px;color:#8b92a1';
+  close.onclick=()=>{stop=true;panel.remove();};
+  panel.append(close,title,body,btn); document.body.appendChild(panel);
+  let stop=false;
+  const prof=document.querySelector('a[data-testid="AppTabBar_Profile_Link"]');
+  const h=((prof&&prof.getAttribute('href'))||'').replace(/^\//,'').toLowerCase();
+  title.textContent='🧹 Clearline'+(cfg.dry?' · dry run':'');
+  if(!h){body.textContent='Please log in to X first, then click the bookmark again.';btn.textContent='Close';btn.onclick=()=>panel.remove();return;}
+  const what=[cfg.posts&&'posts',cfg.replies&&'replies',cfg.reposts&&'reposts',cfg.likes&&'likes'].filter(Boolean);
+  if(!what.length){body.textContent='Nothing is selected in your settings.';btn.textContent='Close';btn.onclick=()=>panel.remove();return;}
+  body.textContent='Account: @'+h+'\nWill '+(cfg.dry?'count':'remove')+': '+what.join(', ')+'\n\nKeep this tab open and visible while it runs.';
+  btn.textContent=cfg.dry?'Start dry run':'Start cleaning';
+  await new Promise(r=>{btn.onclick=r;});
+  btn.textContent='Stop'; btn.onclick=()=>{stop=true;btn.textContent='Stopping…';};
+  const c={posts:0,replies:0,reposts:0,likes:0,skipped:0}; let total=0, status='Starting…';
+  const draw=()=>{body.textContent='@'+h+' · '+status+'\n\nPosts deleted: '+c.posts+'\nReplies deleted: '+c.replies+'\nReposts undone: '+c.reposts+'\nLikes removed: '+c.likes+'\nSkipped: '+c.skipped;};
+  draw();
+  const wait=()=>sleep(cfg.delay+Math.floor(Math.random()*cfg.delay*0.5));
+  const waitFor=async(sel,t=4000)=>{const end=Date.now()+t;while(Date.now()<end){const el=document.querySelector(sel);if(el)return el;await sleep(100);}return null;};
+  const esc=()=>document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',keyCode:27,bubbles:true}));
+  const go=async p=>{
+    if(location.pathname.toLowerCase()!==p){history.pushState({},'',p);dispatchEvent(new PopStateEvent('popstate',{state:{}}));}
+    window.scrollTo(0,0); await sleep(1500);
+    await waitFor('article[data-testid="tweet"]',10000); await sleep(800);
+  };
+  const from=cfg.from?new Date(cfg.from+'T00:00:00'):null, to=cfg.to?new Date(cfg.to+'T23:59:59'):null;
+  const keep=cfg.keep.map(k=>k.toLowerCase()).filter(Boolean);
+  const ctx=a=>((a.querySelector('[data-testid="socialContext"]')||{}).innerText||'');
+  const passes=a=>{
+    const t=a.querySelector('time'); const d=t?new Date(t.getAttribute('datetime')):null;
+    if(d&&from&&d<from) return false; if(d&&to&&d>to) return false;
+    const txt=(a.innerText||'').toLowerCase(); if(keep.some(k=>txt.includes(k))) return false;
+    if(cfg.keepPinned&&/pinned/i.test(ctx(a))) return false;
+    return true;
+  };
+  const authorOf=a=>{const u=a.querySelector('[data-testid="User-Name"]');if(!u)return '';const l=[...u.querySelectorAll('a[href^="/"]')].map(x=>x.getAttribute('href').toLowerCase()).find(x=>/^\/[a-z0-9_]+$/.test(x));return l?l.slice(1):'';};
+  const isReply=a=>{
+    if(/replying to/i.test((a.innerText||'').slice(0,400))) return true;
+    const cell=a.closest('[data-testid="cellInnerDiv"]'); const p=cell&&cell.previousElementSibling;
+    const pa=p&&p.querySelector('article[data-testid="tweet"]');
+    return !!(pa&&authorOf(pa)&&authorOf(pa)!==h);
+  };
+  const rest=async()=>{
+    const toast=document.querySelector('[data-testid="toast"]');
+    if(toast&&/(rate|limit|something went wrong|try again)/i.test(toast.innerText)){status='X is limiting — resting 5 min';draw();for(let i=0;i<300&&!stop;i++)await sleep(1000);}
+    if(cfg.pauseEvery>0&&total>0&&total%cfg.pauseEvery===0){status='Resting '+cfg.pauseSec+'s';draw();for(let i=0;i<cfg.pauseSec&&!stop;i++)await sleep(1000);}
+  };
+  const sweep=async mode=>{
+    const done=new WeakSet(); let idle=0;
+    while(!stop&&idle<8&&total<cfg.limit){
+      status=mode==='likes'?'Removing likes…':'Cleaning posts…';
+      const arts=[...document.querySelectorAll('article[data-testid="tweet"]')].filter(a=>!done.has(a));
+      let acted=false;
+      for(const a of arts){
+        if(stop||total>=cfg.limit) break;
+        done.add(a); if(!a.isConnected) continue;
+        try{
+          if(mode==='likes'){
+            const b=a.querySelector('[data-testid="unlike"]');
+            if(!b||!passes(a)){c.skipped++;continue;}
+            a.scrollIntoView({block:'center'}); await sleep(250);
+            if(!cfg.dry) b.click();
+            c.likes++;
+          } else if(/repost/i.test(ctx(a))){
+            if(!cfg.reposts||!passes(a)){c.skipped++;continue;}
+            const b=a.querySelector('[data-testid="unretweet"]'); if(!b){c.skipped++;continue;}
+            a.scrollIntoView({block:'center'}); await sleep(250);
+            if(!cfg.dry){b.click();const ok=await waitFor('[data-testid="unretweetConfirm"]');if(!ok){esc();c.skipped++;continue;}ok.click();}
+            c.reposts++;
+          } else if(authorOf(a)===h){
+            const reply=isReply(a);
+            if((reply&&!cfg.replies)||(!reply&&!cfg.posts)||!passes(a)){c.skipped++;continue;}
+            a.scrollIntoView({block:'center'}); await sleep(250);
+            if(!cfg.dry){
+              const caret=a.querySelector('[data-testid="caret"]'); if(!caret){c.skipped++;continue;}
+              caret.click(); const menu=await waitFor('[role="menu"]'); if(!menu){c.skipped++;continue;}
+              const del=[...menu.querySelectorAll('[role="menuitem"]')].find(m=>m.innerText.trim().toLowerCase()===cfg.delWord.toLowerCase());
+              if(!del){esc();c.skipped++;continue;}
+              del.click(); const ok=await waitFor('[data-testid="confirmationSheetConfirm"]'); if(!ok){esc();c.skipped++;continue;} ok.click();
+            }
+            reply?c.replies++:c.posts++;
+          } else continue;
+          total++; acted=true; draw(); await wait(); await rest();
+        }catch(e){console.warn('[Clearline]',e);esc();c.skipped++;}
+      }
+      if(!acted){status='Loading more…';draw();window.scrollBy(0,window.innerHeight*2);await sleep(2500);idle++;}
+      else idle=0;
+      draw();
+    }
+  };
+  if(!stop&&(cfg.posts||cfg.replies||cfg.reposts)){await go('/'+h+(cfg.replies?'/with_replies':''));await sweep('timeline');}
+  if(!stop&&cfg.likes&&total<cfg.limit){await go('/'+h+'/likes');await sweep('likes');}
+  status=stop?'Stopped.':(total>=cfg.limit?'Hit your action limit.':'All done ✓');
+  if(cfg.dry) status+=' (dry run — nothing removed)';
+  draw(); btn.textContent='Close'; btn.onclick=()=>panel.remove();
+}
+
+/* ===== Page logic ===== */
+const $=id=>document.getElementById(id);
+const ids=['posts','replies','reposts','likes','from','to','keep','keepPinned','dry','delay','pauseEvery','pauseSec','limit','delWord'];
+function cfg(){
+  return {
+    posts:$('posts').checked, replies:$('replies').checked, reposts:$('reposts').checked, likes:$('likes').checked,
+    from:$('from').value, to:$('to').value,
+    keep:$('keep').value.split(',').map(s=>s.trim()).filter(Boolean),
+    keepPinned:$('keepPinned').checked, dry:$('dry').checked,
+    delay:+$('delay').value, pauseEvery:Math.max(0,+$('pauseEvery').value||0), pauseSec:Math.max(5,+$('pauseSec').value||60),
+    limit:Math.max(1,+$('limit').value||5000), delWord:$('delWord').value.trim()||'Delete'
+  };
+}
+function render(){
+  const c=cfg();
+  $('delayV').textContent=(c.delay/1000).toFixed(1)+'s';
+  const what=[c.posts&&'posts',c.replies&&'replies',c.reposts&&'reposts',c.likes&&'likes'].filter(Boolean);
+  let s=what.length?'Your bookmark will '+(c.dry?'<b>count</b>':'<b>remove</b>')+' your <b>'+what.join(', ')+'</b>':'<b>Nothing selected</b> — pick at least one type';
+  if(c.from||c.to) s+=' from <b>'+(c.from||'the start')+'</b> to <b>'+(c.to||'today')+'</b>';
+  if(c.keep.length) s+=', keeping posts that mention <b>'+c.keep.map(k=>k.replace(/[<>&]/g,'')).join(', ')+'</b>';
+  $('summary').innerHTML=s+'.';
+  const code='('+clearlineSweep.toString()+')('+JSON.stringify(c)+');';
+  $('code').value=code;
+  $('bm').href='javascript:'+encodeURIComponent(code+'void 0');
+}
+ids.forEach(id=>{$(id).addEventListener('input',render);$(id).addEventListener('change',render);});
+try{const saved=JSON.parse(localStorage.getItem('clearline')||'{}');ids.forEach(id=>{if(id in saved){const el=$(id);el.type==='checkbox'?el.checked=saved[id]:el.value=saved[id];}});}catch(e){}
+function save(){try{const o={};ids.forEach(id=>{const el=$(id);o[id]=el.type==='checkbox'?el.checked:el.value;});localStorage.setItem('clearline',JSON.stringify(o));}catch(e){}}
+ids.forEach(id=>$(id).addEventListener('change',save));
+$('bm').addEventListener('click',e=>{e.preventDefault();$('nudge').style.display='block';});
+$('copy').addEventListener('click',async()=>{
+  const ta=$('code'); let ok=false;
+  try{await navigator.clipboard.writeText(ta.value);ok=true;}catch(e){}
+  if(!ok){ta.focus();ta.select();try{ok=document.execCommand('copy');}catch(e){}}
+  const t=$('toast'); t.textContent=ok?'Copied — paste it into the x.com console':'Select the script and copy it manually';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600);
+});
+render();
+</script>
+</body>
+</html>

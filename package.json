@@ -1,0 +1,8 @@
+{
+  "name": "clearline",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sign in with X and bulk delete posts, replies, reposts and likes in one click.",
+  "engines": { "node": ">=18" }
+}
